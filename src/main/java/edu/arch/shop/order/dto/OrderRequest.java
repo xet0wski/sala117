@@ -3,7 +3,7 @@ package edu.arch.shop.order.dto;
 import java.math.BigDecimal;
 
 public record OrderRequest(
-        String customerName,
+        Long customerId,
         String productName,
         Integer quantity,
         BigDecimal unitPrice

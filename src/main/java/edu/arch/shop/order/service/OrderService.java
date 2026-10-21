@@ -1,5 +1,7 @@
 package edu.arch.shop.order.service;
 
+import edu.arch.shop.customer.entity.Customer;
+import edu.arch.shop.customer.repository.CustomerRepository;
 import edu.arch.shop.order.dto.OrderRequest;
 import edu.arch.shop.order.dto.OrderResponse;
 import edu.arch.shop.order.entity.Order;
@@ -17,9 +19,11 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final CustomerRepository customerRepository;
 
-    public OrderService(OrderRepository orderRepository) {
+    public OrderService(OrderRepository orderRepository, CustomerRepository customerRepository) {
         this.orderRepository = orderRepository;
+        this.customerRepository = customerRepository;
     }
 
     public List<OrderResponse> findAll() {
@@ -35,8 +39,10 @@ public class OrderService {
     @Transactional
     public OrderResponse create(OrderRequest request) {
         validate(request);
+        Customer customer = findCustomer(request.customerId());
+
         Order order = new Order(
-                request.customerName(),
+                customer,
                 request.productName(),
                 request.quantity(),
                 request.unitPrice()
@@ -47,8 +53,10 @@ public class OrderService {
     @Transactional
     public OrderResponse update(Long id, OrderRequest request) {
         validate(request);
+        Customer customer = findCustomer(request.customerId());
         Order order = findOrder(id);
-        order.setCustomerName(request.customerName());
+
+        order.setCustomer(customer);
         order.setProductName(request.productName());
         order.setQuantity(request.quantity());
         order.setUnitPrice(request.unitPrice());
@@ -63,15 +71,17 @@ public class OrderService {
 
     private Order findOrder(Long id) {
         return orderRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+    }
+
+    private Customer findCustomer(Long customerId) {
+        return customerRepository.findById(customerId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
     }
 
     private void validate(OrderRequest request) {
-        if (request.customerName() == null || request.customerName().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer name is required");
-        }
-        if (request.customerName().length() > 100) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer name is too long");
+        if (request.customerId() == null || request.customerId() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer id is required");
         }
         if (request.productName() == null || request.productName().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product name is required");
@@ -97,9 +107,12 @@ public class OrderService {
         BigDecimal totalPrice = order.getUnitPrice()
                 .multiply(BigDecimal.valueOf(order.getQuantity()));
 
+        Customer customer = order.getCustomer();
+
         return new OrderResponse(
                 order.getId(),
-                order.getCustomerName(),
+                customer != null ? customer.getId() : null,
+                customer != null ? customer.getName() : null,
                 order.getProductName(),
                 order.getQuantity(),
                 order.getUnitPrice(),

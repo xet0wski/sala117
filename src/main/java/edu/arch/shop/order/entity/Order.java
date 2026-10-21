@@ -1,6 +1,6 @@
 package edu.arch.shop.order.entity;
 
-import edu.arch.shop.customer.entity.Customer;
+import edu.arch.shop.customer.Customer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -40,8 +40,8 @@ public class Order {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal unitPrice;
 
-    public Order(String customerName, String productName, Integer quantity, BigDecimal unitPrice) {
-        this.customerName = customerName;
+    public Order(Customer customer, String productName, Integer quantity, BigDecimal unitPrice) {
+        this.customer = customer;
         this.productName = productName;
         this.quantity = quantity;
         this.unitPrice = unitPrice;

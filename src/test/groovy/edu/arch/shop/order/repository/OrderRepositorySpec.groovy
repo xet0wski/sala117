@@ -1,6 +1,6 @@
 package edu.arch.shop.order.repository
 
-import edu.arch.shop.customer.entity.Customer
+import edu.arch.shop.customer.Customer
 import edu.arch.shop.order.entity.Order
 import jakarta.persistence.EntityManager
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,7 +11,7 @@ import spock.lang.Specification
 class OrderRepositorySpec extends Specification {
 
     @Autowired
-    OrderRepository orderRepository
+    OrderRezpository orderRepository
 
     @Autowired
     EntityManager entityManager
